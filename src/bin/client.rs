@@ -1,4 +1,4 @@
-use std::io::{Write, Read};
+use std::io::{Read, Write};
 
 /// Message buffer
 const MESSAGE_SIZE: usize = 32;

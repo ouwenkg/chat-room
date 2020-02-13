@@ -1,31 +1,45 @@
 use std::io::Read;
+use std::net::{SocketAddr, TcpStream};
 use std::thread;
 
+/// Message buffer
 const MESSAGE_SIZE: usize = 32;
+/// The local host config
+const LOCAL_HOST: &str = "127.0.0.1:8080";
 
-fn main() {
-    println!("this is server");
-    let listener = std::net::TcpListener::bind("127.0.0.1:8080").unwrap();
-    // listener
-    //     .set_nonblocking(true)
-    //     .expect("Cannot set non-blocking");
+fn main() -> std::io::Result<()> {
+    println!("This is server backend! ");
 
-    loop {
-        match listener.accept() {
-            Ok((mut socket, addr)) => {
-                println!("new client: addr {:?}", addr);
-                println!("new client: stream {:?}", socket);
-
-                thread::spawn(move || loop {
-                    let mut buf = vec![0; MESSAGE_SIZE];
-                    socket.read_exact(&mut buf).unwrap();
-                    let message = buf.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
-                    println!("message bytes: {:?}", message);
-                    let msg = String::from_utf8(message).unwrap();
-                    println!("msg is {:?}", msg);
-                });
+    let listener = std::net::TcpListener::bind(LOCAL_HOST)?;
+    for stream in listener.incoming() {
+        match stream {
+            Ok(stream) => {
+                let connection_addr = stream.peer_addr().unwrap();
+                println!("New connection: {:?}", connection_addr);
+                thread::spawn(move || handle_client(connection_addr, stream));
             }
-            Err(e) => println!("error {:?}", e),
+            Err(e) => {
+                println!("Error: {:?}", e);
+            }
+        }
+    }
+
+    Ok(())
+}
+
+pub fn handle_client(addr: SocketAddr, mut stream: TcpStream) {
+    loop {
+        let mut buf = vec![0u8; MESSAGE_SIZE];
+        match stream.read_exact(&mut buf) {
+            Ok(_) => {
+                let message = buf.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
+                let msg = String::from_utf8(message).unwrap();
+                println!("from {:?}, message: {:?}", addr, msg);
+            }
+            Err(e) => {
+                println!("from {:?}, ncount error {:?}", addr, e);
+                break;
+            }
         }
     }
 }
