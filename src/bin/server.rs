@@ -18,8 +18,9 @@ fn main() {
 
                 thread::spawn(move || loop {
                     let mut buf = vec![0; MESSAGE_SIZE];
-                    socket.read_exact(&mut buf);
+                    socket.read_exact(&mut buf).unwrap();
                     let message = buf.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
+                    println!("message bytes: {:?}", message);
                     let msg = String::from_utf8(message).unwrap();
                     println!("msg is {:?}", msg);
                 });
