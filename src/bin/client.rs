@@ -1,6 +1,6 @@
 use std::io::Write;
 
-const MESSAGE_SIZE: usize = 32;
+const MESSAGE_SIZE: usize = 50;
 
 fn main() {
     println!("this is client");
@@ -11,7 +11,7 @@ fn main() {
     loop {
         let mut buf = String::new();
         let input = std::io::stdin().read_line(&mut buf).unwrap();
-        println!("input msg: {}", buf.trim_end_matches('\n'));
+        // println!("input msg: {}", buf.trim_end_matches('\n'));
 
         if buf == "exit" {
             break;
