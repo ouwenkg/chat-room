@@ -10,13 +10,16 @@ fn main() -> std::io::Result<()> {
     let server = std::net::TcpListener::bind(LOCAL_HOST)?;
     for stream in server.incoming() {
         thread::spawn(move || {
-            let mut websocket = tungstenite::accept(stream.unwrap()).unwrap();
+            let stream = stream.unwrap();
+            let connection_addr = stream.peer_addr().unwrap();
+            println!("New connection: {:?}", connection_addr);
+            let mut websocket = tungstenite::accept(stream).unwrap();
             loop {
                 let msg = websocket.read_message().unwrap();
                 match msg {
                     Message::Text(text) => {
-                        println!("msg in server: {:?}", text);
-                    },
+                        println!("from {:?}, message: {:?}", connection_addr, text);
+                    }
                     _ => {
                         unreachable!();
                     }

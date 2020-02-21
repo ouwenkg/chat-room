@@ -2,7 +2,7 @@ use tungstenite::{connect, Message};
 use url::Url;
 
 /// The local host config
-const LOCAL_HOST: &str = "ws://127.0.0.1:9001/socket";
+const LOCAL_HOST: &str = "ws://127.0.0.1:9001";
 
 fn main() -> std::io::Result<()> {
     println!("*************************************");
