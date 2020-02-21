@@ -1,16 +1,16 @@
-use std::io::{Read, Write};
+use tungstenite::{connect, Message};
+use url::Url;
 
-/// Message buffer
-const MESSAGE_SIZE: usize = 32;
 /// The local host config
-const LOCAL_HOST: &str = "127.0.0.1:8080";
+const LOCAL_HOST: &str = "ws://127.0.0.1:9001/socket";
 
 fn main() -> std::io::Result<()> {
     println!("*************************************");
     println!("*** Welcome to bear chat room *******");
     println!("*************************************");
 
-    let mut stream = std::net::TcpStream::connect(LOCAL_HOST)?;
+    let (mut socket, _response) = connect(Url::parse(LOCAL_HOST).unwrap()).expect("Can't connect");
+
     loop {
         // Read line from stdin
         let mut buf = String::new();
@@ -21,11 +21,11 @@ fn main() -> std::io::Result<()> {
         if buf == "exit" {
             break;
         } else {
-            let mut msg_bytes = buf.as_bytes().to_vec();
-            msg_bytes.resize(MESSAGE_SIZE, 0);
-            stream.write(&msg_bytes);
-            stream.flush();
+            socket.write_message(Message::Text(buf.into())).unwrap();
         }
+
+        // let msg = socket.read_message().expect("Error reading message");
+        // println!("Received in client: {}", msg);
     }
 
     println!("*************************************");
